@@ -691,12 +691,15 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
         try
         {
             tagJSON.put("type",type);
+            tagJSON.put("CUID",Util.byteArrayToCUID(tag.getId(),true));
+
         }
         catch (JSONException e)
         {
             e.printStackTrace();
         }
 
+        /* I guess we just need the tag id
         byte[] buffer = new byte[16];
         int sector = -1;
         int wptr = 0;
@@ -726,13 +729,13 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
 
         try
         {
-            tagJSON.put("data",Util.byteArrayToJSON(buffer));
+            tagJSON.put("data",Util.byteArrayToCUID(buffer));
         }
         catch (JSONException e)
         {
             e.printStackTrace();
         }
-
+        */
         String command = MessageFormat.format(javaScriptEventTemplate, MIFARE_ULTRALIGHT, tagJSON);
         Log.v(TAG, command);
         this.webView.sendJavascript(command);
@@ -742,6 +745,26 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
     private void fireMifareClassicEvent(Tag tag)
     {
         CordovaWebView webview = this.webView;
+        JSONObject tagJSON = Util.tagToJSON(tag);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        MifareClassic mifare = MifareClassic.get(tag);
+        int size = mifare.getSize();
+        int type = mifare.getType();
+        try
+        {
+            tagJSON.put("type",type);
+            tagJSON.put("size",size);
+            tagJSON.put("CUID",Util.byteArrayToCUID(tag.getId(),false));
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+        String command = MessageFormat.format(javaScriptEventTemplate, MIFARE_CLASSIC, tagJSON);
+        Log.v(TAG, command);
+        webView.sendJavascript(command);
+        /*
         new AsyncTask<Tag,Void,String>()
         {
             protected String doInBackground(Tag... tags)
@@ -758,6 +781,7 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
                 {
                     tagJSON.put("type",type);
                     tagJSON.put("size",size);
+                    tagJSON.put("CUID",Util.byteArrayToCUID(tag.getId(),false));
                 }
                 catch (JSONException e)
                 {
@@ -826,6 +850,7 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
                 webView.sendJavascript(command);
             }
         }.execute(tag);
+        */
     }
 
     private void fireNdefFormatableEvent (Tag tag) {
@@ -956,3 +981,4 @@ public class NfcPlugin extends CordovaPlugin implements NfcAdapter.OnNdefPushCom
 
     }
 }
+

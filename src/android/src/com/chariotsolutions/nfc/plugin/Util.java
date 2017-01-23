@@ -9,6 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -137,4 +141,73 @@ public class Util {
         return json;
     }
 
+    static String byteArrayToCUID(byte[] bytes, boolean isUltralight)
+    {
+        try
+        {
+            if (bytes.length == 4)
+            {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                for(int i = bytes.length-1; i >= 0; --i) out.write(bytes[i]);
+                String numeric = "" + Integer.parseInt(getHex(out.toByteArray()), 16);
+                while(numeric.length() < 11) { numeric = "0"+numeric; }
+
+                return addCheckDigit("0160" + numeric);
+            }
+            if (bytes.length == 7)
+            {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                for(int i = 1; i <bytes.length; ++i) out.write(bytes[i]);
+                String numeric = "" + Long.decode("0x" + getHex(out.toByteArray()));
+                while(numeric.length() < 11) { numeric = "0"+numeric; }
+                if(isUltralight)
+                {
+                    return addCheckDigit("0001" + numeric);
+                }
+                return addCheckDigit("0170" + numeric);
+            }
+        }
+        catch(Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String addCheckDigit(String s)
+    {
+        String digits = "";
+        boolean shouldDouble = true;
+        for(int i = s.length()-1; i >= 0; --i)
+        {
+            String c = s.substring(i,i+1);
+            int value = Integer.parseInt(c);
+            if(shouldDouble) value *= 2;
+            shouldDouble = !shouldDouble;
+            digits = digits + value;
+        }
+        int sum = 0;
+        for(int i = 0; i < digits.length(); ++i)
+        {
+            String c = digits.substring(i,i+1);
+            sum += Integer.parseInt(c);
+        }
+        sum %= 10;
+        return s + ((10 - sum)%10);
+    }
+
+    static final String HEXES = "0123456789ABCDEF";
+    public static String getHex( byte [] raw ) {
+        if ( raw == null ) {
+            return null;
+        }
+        final StringBuilder hex = new StringBuilder( 2 * raw.length );
+        for ( final byte b : raw ) {
+            hex.append(HEXES.charAt((b & 0xF0) >> 4))
+               .append(HEXES.charAt((b & 0x0F)));
+        }
+        return hex.toString();
+    }
+
 }
+
