@@ -31,5 +31,6 @@
     "url": "https://github.com/chariotsolutions/phonegap-nfc/issues"
   },
   "homepage": "https://github.com/chariotsolutions/phonegap-nfc#readme",
-  "types": "./index.d.ts"
+  "main": "./www/phonegap-nfc.js",
+  "types": "./www/phonegap-nfc.d.ts"
 }
