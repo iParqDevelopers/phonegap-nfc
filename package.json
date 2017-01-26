@@ -32,5 +32,5 @@
   },
   "homepage": "https://github.com/chariotsolutions/phonegap-nfc#readme",
   "main": "./www/phonegap-nfc.js",
-  "typings": "./www/phonegap-nfc.d.ts"
+  "types": "./www/phonegap-nfc.d.ts"
 }
