@@ -149,7 +149,7 @@ public class Util {
             {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 for(int i = bytes.length-1; i >= 0; --i) out.write(bytes[i]);
-                String numeric = "" + Integer.parseInt(getHex(out.toByteArray()), 16);
+                String numeric = "" + Long.decode("0x" + getHex(out.toByteArray()));
                 while(numeric.length() < 11) { numeric = "0"+numeric; }
 
                 return addCheckDigit("0160" + numeric);
